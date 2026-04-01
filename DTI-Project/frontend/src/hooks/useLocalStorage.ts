@@ -1,21 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * Custom hook for managing localStorage with JSON serialization
  * @example
  * const [user, setUser] = useLocalStorage('user', null);
  */
-export const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] => {
-  const [storedValue, setStoredValue] = useState<T>(() => {
+export const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void, boolean] => {
+  const initialValueRef = useRef(initialValue);
+  const [storedValue, setStoredValue] = useState<T>(initialValueRef.current);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
     try {
-      if (typeof window === 'undefined') return initialValue;
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      setStoredValue(item ? JSON.parse(item) : initialValueRef.current);
     } catch (error) {
       console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
+      setStoredValue(initialValueRef.current);
+    } finally {
+      setIsHydrated(true);
     }
-  });
+  }, [key]);
 
   const setValue = useCallback(
     (value: T | ((val: T) => T)) => {
@@ -33,7 +38,7 @@ export const useLocalStorage = <T,>(key: string, initialValue: T): [T, (value: T
     [key, storedValue]
   );
 
-  return [storedValue, setValue];
+  return [storedValue, setValue, isHydrated];
 };
 
 /**

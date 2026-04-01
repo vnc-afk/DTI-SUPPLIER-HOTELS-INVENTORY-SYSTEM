@@ -11,8 +11,9 @@ import { useRole } from "@/contexts/RoleContext";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
-  SidebarFooter, useSidebar,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar-context";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {

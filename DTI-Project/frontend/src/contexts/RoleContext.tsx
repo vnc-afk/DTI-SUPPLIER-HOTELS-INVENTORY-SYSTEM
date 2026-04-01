@@ -8,6 +8,7 @@ type RoleContextValue = {
   role: UserRole | null;
   setRole: (role: UserRole | null) => void;
   userName: string;
+  isHydrated: boolean;
 };
 
 const defaultUserNames: Record<UserRole, string> = {
@@ -19,8 +20,8 @@ const defaultUserNames: Record<UserRole, string> = {
 const RoleContext = createContext<RoleContextValue | undefined>(undefined);
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [storedRole, setStoredRole] = useLocalStorage<UserRole | null>("dti-role", null);
-  const [storedUserName, setStoredUserName] = useLocalStorage<string>("dti-user-name", "Guest Access");
+  const [storedRole, setStoredRole, roleHydrated] = useLocalStorage<UserRole | null>("dti-role", null);
+  const [storedUserName, setStoredUserName, userNameHydrated] = useLocalStorage<string>("dti-user-name", "Guest Access");
 
   const value = useMemo<RoleContextValue>(() => {
     const setRole = (nextRole: UserRole | null) => {
@@ -32,8 +33,9 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       role: storedRole,
       setRole,
       userName: storedUserName,
+      isHydrated: roleHydrated && userNameHydrated,
     };
-  }, [setStoredRole, setStoredUserName, storedRole, storedUserName]);
+  }, [setStoredRole, setStoredUserName, storedRole, storedUserName, roleHydrated, userNameHydrated]);
 
   return <RoleContext.Provider value={value}>{children}</RoleContext.Provider>;
 }

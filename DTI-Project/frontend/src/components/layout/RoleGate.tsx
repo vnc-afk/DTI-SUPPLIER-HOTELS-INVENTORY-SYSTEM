@@ -12,11 +12,15 @@ type RoleGateProps = {
 };
 
 export function RoleGate({ allowedRoles, fallbackPath = "/dashboard", children }: RoleGateProps) {
-  const { role } = useRole();
+  const { role, isHydrated } = useRole();
   const router = useRouter();
   const isAllowed = role ? allowedRoles.includes(role) : false;
 
   useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
     if (!role) {
       router.replace("/");
       return;
@@ -25,9 +29,9 @@ export function RoleGate({ allowedRoles, fallbackPath = "/dashboard", children }
     if (!isAllowed) {
       router.replace(fallbackPath);
     }
-  }, [fallbackPath, isAllowed, role, router]);
+  }, [fallbackPath, isAllowed, isHydrated, role, router]);
 
-  if (!isAllowed) {
+  if (!isHydrated || !isAllowed) {
     return null;
   }
 
