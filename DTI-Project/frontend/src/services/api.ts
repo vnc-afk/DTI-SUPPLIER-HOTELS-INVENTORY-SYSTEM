@@ -3,7 +3,7 @@ import { API_ENDPOINTS, API_TIMEOUT } from '@/lib/constants';
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  body?: any;
+  body?: Record<string, unknown>;
   token?: string;
 }
 
@@ -80,14 +80,14 @@ class ApiService {
     get: (id: string, token: string) =>
       this.request(`${API_ENDPOINTS.PRODUCTS}/${id}`, { token }),
 
-    create: (data: any, token: string) =>
+    create: (data: Record<string, unknown>, token: string) =>
       this.request(API_ENDPOINTS.PRODUCTS, {
         method: 'POST',
         body: data,
         token,
       }),
 
-    update: (id: string, data: any, token: string) =>
+    update: (id: string, data: Record<string, unknown>, token: string) =>
       this.request(`${API_ENDPOINTS.PRODUCTS}/${id}`, {
         method: 'PUT',
         body: data,
@@ -106,7 +106,7 @@ class ApiService {
     list: (token: string, query?: string) =>
       this.request(`${API_ENDPOINTS.SALES}${query || ''}`, { token }),
 
-    create: (data: any, token: string) =>
+    create: (data: Record<string, unknown>, token: string) =>
       this.request(API_ENDPOINTS.SALES, {
         method: 'POST',
         body: data,
@@ -125,7 +125,7 @@ class ApiService {
     get: (id: string, token: string) =>
       this.request(`${API_ENDPOINTS.PAYMENTS}/${id}`, { token }),
 
-    submit: (data: any, token: string) =>
+    submit: (data: Record<string, unknown>, token: string) =>
       this.request(API_ENDPOINTS.PAYMENTS, {
         method: 'POST',
         body: data,

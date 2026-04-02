@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { FileText, Search } from "lucide-react";
-import { RoleGate } from "@/components/layout/RoleGate";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { RoleGate } from "@/layout/RoleGate";
+import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 

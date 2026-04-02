@@ -7,13 +7,13 @@ import {
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useRouter } from "next/navigation";
-import { useRole } from "@/contexts/RoleContext";
+import { useRole } from "@/contexts/use-role";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { useSidebar } from "@/components/ui/sidebar-context";
+import { useSidebar } from "@/contexts/sidebar-context";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {

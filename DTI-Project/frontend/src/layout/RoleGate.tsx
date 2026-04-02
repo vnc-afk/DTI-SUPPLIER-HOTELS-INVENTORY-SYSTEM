@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useRole } from "@/contexts/RoleContext";
+import { useRole } from "@/contexts/use-role";
 import type { UserRole } from "@/types";
 
 type RoleGateProps = {

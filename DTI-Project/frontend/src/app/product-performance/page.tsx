@@ -1,7 +1,7 @@
 "use client";
 
-import { RoleGate } from "@/components/layout/RoleGate";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { RoleGate } from "@/layout/RoleGate";
+import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";

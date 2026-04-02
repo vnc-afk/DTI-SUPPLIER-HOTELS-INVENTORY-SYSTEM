@@ -1,7 +1,7 @@
 "use client";
 
-import { RoleGate } from "@/components/layout/RoleGate";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { RoleGate } from "@/layout/RoleGate";
+import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatCard } from "@/components/ui/stat-card";

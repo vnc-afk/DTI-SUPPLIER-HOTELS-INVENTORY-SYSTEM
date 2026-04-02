@@ -4,7 +4,7 @@ import { ValidationErrors, validateForm } from '@/lib/validators';
 export interface UseFormOptions<T> {
   initialValues: T;
   onSubmit: (values: T) => Promise<void> | void;
-  validationSchema?: Record<string, (value: any) => string | null>;
+  validationSchema?: Record<string, (value: unknown) => string | null>;
 }
 
 /**
@@ -18,7 +18,7 @@ export interface UseFormOptions<T> {
  *   onSubmit: async (values) => { ... },
  * });
  */
-export const useForm = <T extends Record<string, any>>({
+export const useForm = <T extends Record<string, unknown>>({
   initialValues,
   onSubmit,
   validationSchema,
@@ -92,7 +92,7 @@ export const useForm = <T extends Record<string, any>>({
     setIsSubmitting(false);
   }, [initialValues]);
 
-  const setFieldValue = useCallback((field: keyof T, value: any) => {
+  const setFieldValue = useCallback((field: keyof T, value: unknown) => {
     setValues((prev) => ({ ...prev, [field]: value }));
   }, []);
 

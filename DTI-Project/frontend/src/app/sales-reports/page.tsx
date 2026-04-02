@@ -1,8 +1,8 @@
 "use client";
 
-import { useRole } from "@/contexts/RoleContext";
-import { RoleGate } from "@/components/layout/RoleGate";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useRole } from "@/contexts/use-role";
+import { RoleGate } from "@/layout/RoleGate";
+import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart,

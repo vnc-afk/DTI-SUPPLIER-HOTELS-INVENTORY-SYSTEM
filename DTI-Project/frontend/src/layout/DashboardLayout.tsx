@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { useRole } from "@/contexts/RoleContext";
+import { useRole } from "@/contexts/use-role";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 

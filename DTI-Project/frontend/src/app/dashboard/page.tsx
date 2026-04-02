@@ -13,9 +13,9 @@ import {
   Line,
 } from "recharts";
 import { Users, Truck, TrendingUp, ShieldCheck, Package, Building2, AlertTriangle, DollarSign, ShoppingCart } from "lucide-react";
-import { useRole } from "@/contexts/RoleContext";
-import { RoleGate } from "@/components/layout/RoleGate";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useRole } from "@/contexts/use-role";
+import { RoleGate } from "@/layout/RoleGate";
+import { DashboardLayout } from "@/layout/DashboardLayout";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";

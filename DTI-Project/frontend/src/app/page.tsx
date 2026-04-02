@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, ShieldCheck, Truck } from "lucide-react";
-import { useRole } from "@/contexts/RoleContext";
+import { useRole } from "@/contexts/use-role";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 

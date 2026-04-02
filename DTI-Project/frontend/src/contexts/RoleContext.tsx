@@ -1,23 +1,10 @@
 "use client";
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import type { UserRole } from "@/types";
-
-type RoleContextValue = {
-  role: UserRole | null;
-  setRole: (role: UserRole | null) => void;
-  userName: string;
-  isHydrated: boolean;
-};
-
-const defaultUserNames: Record<UserRole, string> = {
-  supplier: "CleanCo Supplies",
-  hotel: "Grand Plaza Hotel",
-  admin: "DTI Compliance Desk",
-};
-
-const RoleContext = createContext<RoleContextValue | undefined>(undefined);
+import { RoleContextValue, defaultUserNames } from "./role-context.types";
+import { RoleContext } from "./role.context";
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [storedRole, setStoredRole, roleHydrated] = useLocalStorage<UserRole | null>("dti-role", null);
@@ -38,14 +25,4 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   }, [setStoredRole, setStoredUserName, storedRole, storedUserName, roleHydrated, userNameHydrated]);
 
   return <RoleContext.Provider value={value}>{children}</RoleContext.Provider>;
-}
-
-export function useRole() {
-  const context = useContext(RoleContext);
-
-  if (!context) {
-    throw new Error("useRole must be used within a RoleProvider.");
-  }
-
-  return context;
 }

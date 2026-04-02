@@ -5,7 +5,8 @@ import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider } fro
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { FormFieldContext, FormItemContext, useFormField } from "@/components/ui/form-context";
+import { FormFieldContext, FormItemContext } from "@/contexts/form-context";
+import { useFormField } from "@/contexts/use-form-field";
 
 const Form = FormProvider;
 

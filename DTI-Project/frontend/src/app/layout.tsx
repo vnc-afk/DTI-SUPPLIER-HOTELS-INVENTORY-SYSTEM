@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "./providers";
+import { metadata } from "./layout.metadata";
 import "@/styles/globals.css";
 
 const inter = Inter({
@@ -8,10 +8,8 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "DTI Supplier Hotels Inventory System",
-  description: "Role-based inventory, sales, and compliance portal for suppliers, hotels, and DTI admins.",
-};
+// eslint-disable-next-line react-refresh/only-export-components
+export { metadata };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
