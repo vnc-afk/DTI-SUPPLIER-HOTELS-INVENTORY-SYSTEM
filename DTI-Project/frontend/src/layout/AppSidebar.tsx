@@ -25,6 +25,7 @@ interface NavItem {
 const supplierNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Products", url: "/products", icon: Package },
+  { title: "Hotels", url: "/hotels", icon: Building2 },
   { title: "Hotel Inventory", url: "/hotel-inventory", icon: Building2 },
   { title: "Low-Stock Alerts", url: "/alerts", icon: AlertTriangle },
   { title: "Sales Reports", url: "/sales-reports", icon: BarChart3 },
@@ -41,6 +42,7 @@ const hotelNav: NavItem[] = [
 
 const adminNav: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Hotels", url: "/hotels", icon: Building2 },
   { title: "Users & Suppliers", url: "/users", icon: Users },
   { title: "Sales Monitoring", url: "/sales-monitoring", icon: TrendingUp },
   { title: "Product Performance", url: "/product-performance", icon: BarChart3 },
