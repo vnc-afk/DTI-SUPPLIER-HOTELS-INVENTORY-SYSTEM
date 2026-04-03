@@ -106,6 +106,9 @@ class ApiService {
     list: (token: string, query?: string) =>
       this.request(`${API_ENDPOINTS.SALES}${query || ''}`, { token }),
 
+    recent: (token: string) =>
+      this.request(`${API_ENDPOINTS.SALES}/recent`, { token }),
+
     create: (data: Record<string, unknown>, token: string) =>
       this.request(API_ENDPOINTS.SALES, {
         method: 'POST',
@@ -140,6 +143,38 @@ class ApiService {
 
     get: (id: string, token: string) =>
       this.request(`${API_ENDPOINTS.CONSIGNMENTS}/${id}`, { token }),
+  };
+
+  dashboard = {
+    get: (token: string, role: string) =>
+      this.request(`${API_ENDPOINTS.DASHBOARD}?role=${encodeURIComponent(role)}`, { token }),
+  };
+
+  users = {
+    list: (token: string, query?: string) =>
+      this.request(`${API_ENDPOINTS.USERS}${query || ''}`, { token }),
+
+    create: (data: Record<string, unknown>, token: string) =>
+      this.request(API_ENDPOINTS.USERS, { method: 'POST', body: data, token }),
+
+    toggleStatus: (id: string, token: string) =>
+      this.request(`${API_ENDPOINTS.USERS}/${id}/status`, { method: 'PATCH', token }),
+  };
+
+  alerts = {
+    list: (token: string) => this.request(API_ENDPOINTS.ALERTS, { token }),
+  };
+
+  auditLogs = {
+    list: (token: string, query?: string) =>
+      this.request(`${API_ENDPOINTS.AUDIT_LOGS}${query || ''}`, { token }),
+  };
+
+  reports = {
+    sales: (token: string) => this.request(API_ENDPOINTS.SALES_REPORTS, { token }),
+    performance: (token: string) => this.request(API_ENDPOINTS.PRODUCT_PERFORMANCE, { token }),
+    monitoring: (token: string) => this.request(API_ENDPOINTS.SALES_MONITORING, { token }),
+    compliance: (token: string) => this.request(API_ENDPOINTS.COMPLIANCE, { token }),
   };
 }
 

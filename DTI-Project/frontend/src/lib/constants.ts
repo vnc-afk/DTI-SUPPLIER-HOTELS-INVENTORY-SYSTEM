@@ -55,7 +55,14 @@ export const API_ENDPOINTS = {
   SALES: '/api/sales',
   PAYMENTS: '/api/payments',
   CONSIGNMENTS: '/api/consignments',
+  ALERTS: '/api/alerts',
+  AUDIT_LOGS: '/api/audit-logs',
+  DASHBOARD: '/api/dashboard',
   REPORTS: '/api/reports',
+  SALES_REPORTS: '/api/reports/sales',
+  PRODUCT_PERFORMANCE: '/api/reports/performance',
+  SALES_MONITORING: '/api/reports/monitoring',
+  COMPLIANCE: '/api/reports/compliance',
 } as const;
 
 export const TOAST_DURATION = 3000; // milliseconds

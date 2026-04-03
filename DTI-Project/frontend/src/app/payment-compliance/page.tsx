@@ -1,5 +1,6 @@
 "use client";
 
+import { useFetch } from "@/hooks/useFetch";
 import { RoleGate } from "@/layout/RoleGate";
 import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,19 +8,39 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { StatCard } from "@/components/ui/stat-card";
 import { ShieldCheck, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 
-const complianceData = [
-  { supplier: "CleanCo Supplies", hotel: "Grand Plaza Hotel", amount: "₱125,000", dueDate: "Mar 15, 2026", paidDate: "Mar 14, 2026", status: "paid" as const },
-  { supplier: "TextilePro Inc.", hotel: "Seaside Resort", amount: "₱78,500", dueDate: "Mar 20, 2026", paidDate: "—", status: "pending" as const },
-  { supplier: "HotelEssentials", hotel: "Mountain View Inn", amount: "₱45,200", dueDate: "Mar 10, 2026", paidDate: "—", status: "overdue" as const },
-  { supplier: "CleanCo Supplies", hotel: "City Center Hotel", amount: "₱92,300", dueDate: "Mar 18, 2026", paidDate: "Mar 17, 2026", status: "paid" as const },
-  { supplier: "TextilePro Inc.", hotel: "Grand Plaza Hotel", amount: "₱63,700", dueDate: "Mar 22, 2026", paidDate: "—", status: "pending" as const },
-  { supplier: "CleanCo Supplies", hotel: "Bayfront Hotel", amount: "₱38,900", dueDate: "Mar 5, 2026", paidDate: "—", status: "overdue" as const },
-];
-
 function PaymentComplianceContent() {
-  const paid = complianceData.filter((item) => item.status === "paid").length;
-  const pending = complianceData.filter((item) => item.status === "pending").length;
-  const overdue = complianceData.filter((item) => item.status === "overdue").length;
+  type ComplianceRow = {
+    supplier: string;
+    hotel: string;
+    amount: string;
+    dueDate: string;
+    paidDate: string;
+    status: "paid" | "pending" | "overdue";
+  };
+
+  const { data, loading, error } = useFetch<{ complianceData: ComplianceRow[] }>("/api/reports/compliance");
+  const complianceData = data?.complianceData || [];
+  const paid = complianceData.filter((item: ComplianceRow) => item.status === "paid").length;
+  const pending = complianceData.filter((item: ComplianceRow) => item.status === "pending").length;
+  const overdue = complianceData.filter((item: ComplianceRow) => item.status === "overdue").length;
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border bg-card p-6 text-muted-foreground">Loading compliance data...</div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
+          Failed to load compliance data.
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -54,7 +75,7 @@ function PaymentComplianceContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {complianceData.map((item, index) => (
+                  {complianceData.map((item: ComplianceRow, index: number) => (
                     <tr key={index} className="border-b last:border-0 hover:bg-muted/30">
                       <td className="px-4 py-4 font-medium">{item.supplier}</td>
                       <td className="px-4 py-4">{item.hotel}</td>

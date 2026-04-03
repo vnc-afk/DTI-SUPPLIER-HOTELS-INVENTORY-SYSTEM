@@ -1,20 +1,33 @@
 "use client";
 
 import { AlertTriangle, CheckCircle, Bell } from "lucide-react";
+import { useFetch } from "@/hooks/useFetch";
 import { RoleGate } from "@/layout/RoleGate";
 import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const alerts = [
-  { id: 1, product: "Hand Towels (6pc)", hotel: "Grand Plaza Hotel", stock: 3, minStock: 10, severity: "critical" as const, time: "10 min ago" },
-  { id: 2, product: "Shower Gel 250ml", hotel: "Seaside Resort", stock: 5, minStock: 20, severity: "critical" as const, time: "25 min ago" },
-  { id: 3, product: "Body Lotion 300ml", hotel: "Mountain View Inn", stock: 8, minStock: 10, severity: "warning" as const, time: "1 hour ago" },
-  { id: 4, product: "Bath Soap Set", hotel: "Grand Plaza Hotel", stock: 12, minStock: 15, severity: "warning" as const, time: "2 hours ago" },
-  { id: 5, product: "Dental Kit", hotel: "City Center Hotel", stock: 15, minStock: 25, severity: "warning" as const, time: "3 hours ago" },
-];
-
 function AlertsContent() {
+  const { data, loading, error } = useFetch<any>("/api/alerts");
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border bg-card p-6 text-muted-foreground">Loading alerts...</div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
+          Failed to load alerts.
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -24,12 +37,12 @@ function AlertsContent() {
               <Bell className="h-8 w-8 text-destructive" />
               Low-Stock Alerts
             </h1>
-            <p className="text-muted-foreground">{alerts.length} items need attention</p>
+            <p className="text-muted-foreground">{(data || []).length} items need attention</p>
           </div>
         </div>
 
         <div className="space-y-4">
-          {alerts.map((alert) => (
+          {(data || []).map((alert: any) => (
             <Card key={alert.id} className={`border-l-4 ${alert.severity === "critical" ? "border-l-destructive" : "border-l-warning"}`}>
               <CardContent className="p-6">
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">

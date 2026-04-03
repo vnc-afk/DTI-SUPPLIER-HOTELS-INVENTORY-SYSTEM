@@ -1,6 +1,7 @@
 "use client";
 
 import { useRole } from "@/contexts/use-role";
+import { useFetch } from "@/hooks/useFetch";
 import { RoleGate } from "@/layout/RoleGate";
 import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,36 +21,29 @@ import {
   Cell,
 } from "recharts";
 
-const monthlySales = [
-  { month: "Jan", sales: 42000 },
-  { month: "Feb", sales: 38000 },
-  { month: "Mar", sales: 51000 },
-  { month: "Apr", sales: 46000 },
-  { month: "May", sales: 58000 },
-  { month: "Jun", sales: 62000 },
-];
-
-const dailySales = [
-  { day: "Mon", sales: 3200 },
-  { day: "Tue", sales: 2800 },
-  { day: "Wed", sales: 4100 },
-  { day: "Thu", sales: 3600 },
-  { day: "Fri", sales: 5200 },
-  { day: "Sat", sales: 6100 },
-  { day: "Sun", sales: 4800 },
-];
-
-const categoryData = [
-  { name: "Toiletries", value: 45 },
-  { name: "Linens", value: 25 },
-  { name: "Amenities", value: 20 },
-  { name: "Other", value: 10 },
-];
-
 const colors = ["hsl(220, 60%, 30%)", "hsl(145, 60%, 36%)", "hsl(38, 90%, 55%)", "hsl(210, 15%, 70%)"];
 
 function SalesReportsContent() {
   const { role } = useRole();
+  const { data, loading, error } = useFetch<any>("/api/reports/sales");
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border bg-card p-6 text-muted-foreground">Loading sales reports...</div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
+          Failed to load sales reports.
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -66,7 +60,7 @@ function SalesReportsContent() {
             <CardHeader><CardTitle>Monthly Sales Trend</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={monthlySales}>
+                <BarChart data={data?.monthlySales || []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 85%)" />
                   <XAxis dataKey="month" tick={{ fontSize: 16 }} />
                   <YAxis tick={{ fontSize: 16 }} tickFormatter={(value) => `₱${value / 1000}K`} />
@@ -82,7 +76,7 @@ function SalesReportsContent() {
             <CardHeader><CardTitle>Daily Sales (This Week)</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={dailySales}>
+                <LineChart data={data?.dailySales || []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 85%)" />
                   <XAxis dataKey="day" tick={{ fontSize: 16 }} />
                   <YAxis tick={{ fontSize: 16 }} tickFormatter={(value) => `₱${value / 1000}K`} />
@@ -100,7 +94,7 @@ function SalesReportsContent() {
               <ResponsiveContainer width="100%" height={320}>
                 <PieChart>
                   <Pie
-                    data={categoryData}
+                    data={data?.categoryData || []}
                     cx="50%"
                     cy="50%"
                     outerRadius={120}
@@ -109,7 +103,7 @@ function SalesReportsContent() {
                     labelLine={{ strokeWidth: 2 }}
                     style={{ fontSize: 16 }}
                   >
-                    {categoryData.map((_, index) => (
+                    {(data?.categoryData || []).map((_: any, index: number) => (
                       <Cell key={index} fill={colors[index]} />
                     ))}
                   </Pie>
@@ -122,13 +116,7 @@ function SalesReportsContent() {
           <Card>
             <CardHeader><CardTitle>Summary</CardTitle></CardHeader>
             <CardContent className="space-y-5">
-              {[
-                { label: "Total Sales (This Month)", value: "₱62,000" },
-                { label: "Average Daily Sales", value: "₱4,257" },
-                { label: "Best Selling Product", value: "Bath Soap Set" },
-                { label: "Top Hotel", value: "Grand Plaza Hotel" },
-                { label: "Growth vs Last Month", value: "+8.2%" },
-              ].map((item, index) => (
+              {(data?.summary || []).map((item: any, index: number) => (
                 <div key={index} className="flex items-center justify-between border-b py-3 last:border-0">
                   <span className="font-medium text-muted-foreground">{item.label}</span>
                   <span className="text-lg font-bold text-foreground">{item.value}</span>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle, ShoppingCart } from "lucide-react";
+import { useFetch } from "@/hooks/useFetch";
 import { RoleGate } from "@/layout/RoleGate";
 import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,28 +10,64 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { api } from "@/services/api";
 
-const products = [
-  { id: "shampoo", name: "Premium Shampoo 500ml", stock: 45, price: 180 },
-  { id: "soap", name: "Bath Soap Set (3pc)", stock: 120, price: 95 },
-  { id: "towels", name: "Hand Towels (6pc)", stock: 30, price: 450 },
-  { id: "gel", name: "Shower Gel 250ml", stock: 68, price: 210 },
-  { id: "dental", name: "Dental Kit", stock: 85, price: 55 },
-  { id: "lotion", name: "Body Lotion 300ml", stock: 42, price: 260 },
-];
+type ProductRow = {
+  id: string;
+  name: string;
+  stock: number;
+  price: number;
+};
 
-const recentSales = [
-  { product: "Premium Shampoo 500ml", qty: 3, total: "₱540", time: "10 min ago" },
-  { product: "Dental Kit", qty: 5, total: "₱275", time: "30 min ago" },
-  { product: "Bath Soap Set (3pc)", qty: 10, total: "₱950", time: "1 hour ago" },
-];
+type RecentSaleRow = {
+  product: string;
+  qty: number;
+  total: string;
+  time: string;
+};
 
 function RecordSaleContent() {
   const [selectedProduct, setSelectedProduct] = useState("");
   const [quantity, setQuantity] = useState("");
+  const { data: productsData, loading, error, refetch } = useFetch<ProductRow[]>("/api/products");
+  const { data: recentSalesData } = useFetch<RecentSaleRow[]>("/api/sales/recent");
+  const [submitting, setSubmitting] = useState(false);
+
+  const products = Array.isArray(productsData) ? productsData : [];
+  const recentSales = Array.isArray(recentSalesData) ? recentSalesData : [];
 
   const selected = products.find((product) => product.id === selectedProduct);
   const total = selected && quantity ? selected.price * Number(quantity) : 0;
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      await api.sales.create({ productId: selectedProduct, quantity: Number(quantity) }, "");
+      setSelectedProduct("");
+      setQuantity("");
+      await refetch();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border bg-card p-6 text-muted-foreground">Loading sale data...</div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
+          Failed to load sale data.
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -98,9 +135,9 @@ function RecordSaleContent() {
                 </div>
               )}
 
-              <Button size="lg" className="w-full py-6 text-base" disabled={!selected || !quantity}>
+              <Button size="lg" className="w-full py-6 text-base" disabled={!selected || !quantity || submitting} onClick={handleSubmit}>
                 <CheckCircle className="mr-2 h-5 w-5" />
-                Record Sale
+                {submitting ? "Recording..." : "Record Sale"}
               </Button>
             </CardContent>
           </Card>

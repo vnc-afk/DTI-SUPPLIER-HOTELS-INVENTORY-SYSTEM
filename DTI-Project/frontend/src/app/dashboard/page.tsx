@@ -1,5 +1,6 @@
 "use client";
 
+import { useFetch } from "@/hooks/useFetch";
 import {
   BarChart,
   Bar,
@@ -21,65 +22,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 
-const supplierSalesData = [
-  { month: "Jan", sales: 4200 },
-  { month: "Feb", sales: 3800 },
-  { month: "Mar", sales: 5100 },
-  { month: "Apr", sales: 4600 },
-  { month: "May", sales: 5800 },
-  { month: "Jun", sales: 6200 },
-];
+type DashboardCard = {
+  title: string;
+  value: string | number;
+  trend?: string;
+  trendUp?: boolean;
+};
 
-const supplierLowStockItems = [
-  { product: "Shampoo 500ml", hotel: "Grand Plaza", stock: 5 },
-  { product: "Bath Soap", hotel: "Seaside Resort", stock: 8 },
-  { product: "Towels (Large)", hotel: "Mountain View", stock: 3 },
-];
+type DashboardResponse = {
+  metrics?: DashboardCard[];
+  chartData?: Array<Record<string, string | number>>;
+  lowStockItems?: Array<{ product: string; hotel: string; stock: number }>;
+  recentPayments?: Array<{ hotel: string; amount: string; status: "paid" | "pending" | "overdue" }>;
+  items?: Array<{ name: string; supplier: string; qty: number; price: string }>;
+  performanceData?: Array<{ product: string; sales: number; returns: number }>;
+  recentActivity?: Array<{ action: string; user: string; time: string }>;
+  compliance?: Array<{ supplier: string; amount: string; status: "paid" | "pending" | "overdue"; dueDate?: string }>;
+};
 
-const supplierRecentPayments = [
-  { hotel: "Grand Plaza Hotel", amount: "₱45,000", status: "paid" as const },
-  { hotel: "Seaside Resort", amount: "₱32,500", status: "pending" as const },
-  { hotel: "Mountain View Inn", amount: "₱28,000", status: "overdue" as const },
-  { hotel: "City Center Hotel", amount: "₱51,200", status: "paid" as const },
-];
-
-const hotelSalesData = [
-  { week: "Week 1", sales: 1200 },
-  { week: "Week 2", sales: 1800 },
-  { week: "Week 3", sales: 1500 },
-  { week: "Week 4", sales: 2200 },
-];
-
-const hotelConsignmentProducts = [
-  { name: "Premium Shampoo", qty: 45, supplier: "CleanCo", price: "₱180" },
-  { name: "Bath Soap Set", qty: 120, supplier: "CleanCo", price: "₱95" },
-  { name: "Hand Towels (6pc)", qty: 30, supplier: "TextilePro", price: "₱450" },
-  { name: "Shower Gel 250ml", qty: 68, supplier: "CleanCo", price: "₱210" },
-];
-
-const adminPerformanceData = [
-  { product: "Shampoo", sales: 820, returns: 12 },
-  { product: "Soap", sales: 1450, returns: 25 },
-  { product: "Towels", sales: 340, returns: 5 },
-  { product: "Gel", sales: 690, returns: 8 },
-  { product: "Lotion", sales: 520, returns: 15 },
-];
-
-const adminRecentActivity = [
-  { action: "New supplier registered", user: "TextilePro Inc.", time: "2 hours ago" },
-  { action: "Payment received", user: "Grand Plaza Hotel", time: "4 hours ago" },
-  { action: "Low stock alert", user: "Seaside Resort", time: "6 hours ago" },
-  { action: "Sales report generated", user: "System", time: "8 hours ago" },
-  { action: "User account updated", user: "Juan Reyes", time: "1 day ago" },
-];
-
-const adminComplianceData = [
-  { supplier: "CleanCo Supplies", status: "paid" as const, amount: "₱125,000", due: "Mar 15" },
-  { supplier: "TextilePro Inc.", status: "pending" as const, amount: "₱78,500", due: "Mar 20" },
-  { supplier: "HotelEssentials", status: "overdue" as const, amount: "₱45,200", due: "Mar 10" },
-];
-
-function SupplierDashboard() {
+function SupplierDashboard({ data }: { data?: DashboardResponse }) {
   return (
     <div className="space-y-8">
       <div>
@@ -88,10 +49,16 @@ function SupplierDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Products" value={148} icon={<Package className="h-6 w-6" />} trend="↑ 12 this month" trendUp />
-        <StatCard title="Hotels Served" value={12} icon={<Building2 className="h-6 w-6" />} />
-        <StatCard title="Low Stock Alerts" value={7} icon={<AlertTriangle className="h-6 w-6" />} trend="3 critical" />
-        <StatCard title="Revenue (Month)" value="₱186K" icon={<DollarSign className="h-6 w-6" />} trend="↑ 8.2%" trendUp />
+        {(data?.metrics || []).map((metric) => (
+          <StatCard
+            key={metric.title}
+            title={metric.title}
+            value={metric.value}
+            icon={metric.title.includes("Product") ? <Package className="h-6 w-6" /> : metric.title.includes("Hotel") ? <Building2 className="h-6 w-6" /> : metric.title.includes("Alert") ? <AlertTriangle className="h-6 w-6" /> : <DollarSign className="h-6 w-6" />}
+            trend={metric.trend}
+            trendUp={metric.trendUp}
+          />
+        ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -101,7 +68,7 @@ function SupplierDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={supplierSalesData}>
+              <BarChart data={data?.chartData || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 85%)" />
                 <XAxis dataKey="month" tick={{ fontSize: 16 }} />
                 <YAxis tick={{ fontSize: 16 }} />
@@ -122,7 +89,7 @@ function SupplierDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {supplierLowStockItems.map((item, index) => (
+              {(data?.lowStockItems || []).map((item, index) => (
                 <div key={index} className="flex items-center justify-between rounded-xl border border-destructive/20 bg-destructive/5 p-4">
                   <div>
                     <p className="font-semibold text-foreground">{item.product}</p>
@@ -151,7 +118,7 @@ function SupplierDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {supplierRecentPayments.map((payment, index) => (
+                {(data?.recentPayments || []).map((payment, index) => (
                   <tr key={index} className="border-b last:border-0">
                     <td className="px-4 py-4 font-medium">{payment.hotel}</td>
                     <td className="px-4 py-4">{payment.amount}</td>
@@ -167,7 +134,7 @@ function SupplierDashboard() {
   );
 }
 
-function HotelDashboard() {
+function HotelDashboard({ data }: { data?: DashboardResponse }) {
   return (
     <div className="space-y-8">
       <div>
@@ -176,10 +143,16 @@ function HotelDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Products on Hand" value={263} icon={<Package className="h-6 w-6" />} />
-        <StatCard title="Sales Today" value={18} icon={<ShoppingCart className="h-6 w-6" />} trend="↑ 5 from yesterday" trendUp />
-        <StatCard title="Revenue (Week)" value="₱28.5K" icon={<DollarSign className="h-6 w-6" />} trend="↑ 12%" trendUp />
-        <StatCard title="Pending Payment" value="₱45K" icon={<TrendingUp className="h-6 w-6" />} trend="Due in 5 days" />
+        {(data?.metrics || []).map((metric) => (
+          <StatCard
+            key={metric.title}
+            title={metric.title}
+            value={metric.value}
+            icon={metric.title.includes("Sales") ? <ShoppingCart className="h-6 w-6" /> : metric.title.includes("Payment") ? <TrendingUp className="h-6 w-6" /> : metric.title.includes("Revenue") ? <DollarSign className="h-6 w-6" /> : <Package className="h-6 w-6" />}
+            trend={metric.trend}
+            trendUp={metric.trendUp}
+          />
+        ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -189,7 +162,7 @@ function HotelDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={hotelSalesData}>
+              <LineChart data={data?.chartData || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 85%)" />
                 <XAxis dataKey="week" tick={{ fontSize: 16 }} />
                 <YAxis tick={{ fontSize: 16 }} />
@@ -211,14 +184,14 @@ function HotelDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {hotelConsignmentProducts.map((item, index) => (
+              {(data?.items || []).map((item, index) => (
                 <div key={index} className="flex items-center justify-between rounded-xl border bg-secondary p-4">
                   <div>
                     <p className="font-semibold text-foreground">{item.name}</p>
                     <p className="text-sm text-muted-foreground">{item.supplier} · {item.price}/unit</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-foreground">{item.qty}</p>
+                        <p className="text-xl font-bold text-foreground">{item.qty}</p>
                     <p className="text-sm text-muted-foreground">in stock</p>
                   </div>
                 </div>
@@ -231,7 +204,7 @@ function HotelDashboard() {
   );
 }
 
-function AdminDashboard() {
+function AdminDashboard({ data }: { data?: DashboardResponse }) {
   return (
     <div className="space-y-8">
       <div>
@@ -240,10 +213,16 @@ function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Users" value={84} icon={<Users className="h-6 w-6" />} trend="↑ 6 this month" trendUp />
-        <StatCard title="Active Suppliers" value={23} icon={<Truck className="h-6 w-6" />} />
-        <StatCard title="Total Sales (Month)" value="₱1.2M" icon={<TrendingUp className="h-6 w-6" />} trend="↑ 15.3%" trendUp />
-        <StatCard title="Compliance Rate" value="92%" icon={<ShieldCheck className="h-6 w-6" />} trend="↑ 3%" trendUp />
+        {(data?.metrics || []).map((metric) => (
+          <StatCard
+            key={metric.title}
+            title={metric.title}
+            value={metric.value}
+            icon={metric.title.includes("User") ? <Users className="h-6 w-6" /> : metric.title.includes("Supplier") ? <Truck className="h-6 w-6" /> : metric.title.includes("Compliance") ? <ShieldCheck className="h-6 w-6" /> : <TrendingUp className="h-6 w-6" />}
+            trend={metric.trend}
+            trendUp={metric.trendUp}
+          />
+        ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -253,7 +232,7 @@ function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={adminPerformanceData}>
+              <BarChart data={data?.performanceData || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 85%)" />
                 <XAxis dataKey="product" tick={{ fontSize: 16 }} />
                 <YAxis tick={{ fontSize: 16 }} />
@@ -272,7 +251,7 @@ function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {adminRecentActivity.map((activity, index) => (
+              {(data?.recentActivity || []).map((activity, index) => (
                 <div key={index} className="flex items-start justify-between rounded-lg p-3 hover:bg-muted/50">
                   <div>
                     <p className="font-medium text-foreground">{activity.action}</p>
@@ -302,11 +281,11 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {adminComplianceData.map((item, index) => (
+                {(data?.compliance || []).map((item, index) => (
                   <tr key={index} className="border-b last:border-0">
                     <td className="px-4 py-4 font-medium">{item.supplier}</td>
                     <td className="px-4 py-4">{item.amount}</td>
-                    <td className="px-4 py-4">{item.due}</td>
+                    <td className="px-4 py-4">{item.dueDate || "—"}</td>
                     <td className="px-4 py-4"><StatusBadge status={item.status} /></td>
                   </tr>
                 ))}
@@ -321,11 +300,34 @@ function AdminDashboard() {
 
 export default function DashboardPage() {
   const { role } = useRole();
+  const { data, loading, error } = useFetch<DashboardResponse>(`/api/dashboard?role=${role}`);
+
+  if (loading) {
+    return (
+      <RoleGate allowedRoles={["supplier", "hotel", "admin"]}>
+        <DashboardLayout>
+          <div className="rounded-xl border bg-card p-6 text-muted-foreground">Loading dashboard...</div>
+        </DashboardLayout>
+      </RoleGate>
+    );
+  }
+
+  if (error) {
+    return (
+      <RoleGate allowedRoles={["supplier", "hotel", "admin"]}>
+        <DashboardLayout>
+          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
+            Failed to load dashboard data.
+          </div>
+        </DashboardLayout>
+      </RoleGate>
+    );
+  }
 
   return (
     <RoleGate allowedRoles={["supplier", "hotel", "admin"]}>
       <DashboardLayout>
-        {role === "admin" ? <AdminDashboard /> : role === "hotel" ? <HotelDashboard /> : <SupplierDashboard />}
+        {role === "admin" ? <AdminDashboard data={data || undefined} /> : role === "hotel" ? <HotelDashboard data={data || undefined} /> : <SupplierDashboard data={data || undefined} />}
       </DashboardLayout>
     </RoleGate>
   );

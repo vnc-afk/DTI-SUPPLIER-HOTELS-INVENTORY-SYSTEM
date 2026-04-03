@@ -1,23 +1,15 @@
 "use client";
 
+import { useFetch } from "@/hooks/useFetch";
 import { RoleGate } from "@/layout/RoleGate";
 import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
-const performanceData = [
-  { product: "Shampoo", sales: 820, returns: 12, rating: 4.5 },
-  { product: "Soap Set", sales: 1450, returns: 25, rating: 4.8 },
-  { product: "Towels", sales: 340, returns: 5, rating: 4.2 },
-  { product: "Shower Gel", sales: 690, returns: 8, rating: 4.6 },
-  { product: "Dental Kit", sales: 520, returns: 15, rating: 3.9 },
-  { product: "Lotion", sales: 410, returns: 10, rating: 4.3 },
-  { product: "Slippers", sales: 380, returns: 3, rating: 4.7 },
-  { product: "Conditioner", sales: 290, returns: 7, rating: 4.1 },
-];
-
 function ProductPerformanceContent() {
+  const { data, loading, error } = useFetch<any>("/api/reports/performance");
+
   const getPerformanceColor = (sales: number) => {
     if (sales >= 1000) return "text-success";
     if (sales >= 500) return "text-warning";
@@ -29,6 +21,24 @@ function ProductPerformanceContent() {
     if (sales >= 500) return "Medium";
     return "Low";
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border bg-card p-6 text-muted-foreground">Loading product performance...</div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-destructive">
+          Failed to load product performance.
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -45,7 +55,7 @@ function ProductPerformanceContent() {
           <CardHeader><CardTitle>Sales vs Returns</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={performanceData}>
+              <BarChart data={data?.performanceData || []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 85%)" />
                 <XAxis dataKey="product" tick={{ fontSize: 16 }} />
                 <YAxis tick={{ fontSize: 16 }} />
@@ -73,7 +83,7 @@ function ProductPerformanceContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {performanceData.map((product, index) => (
+                  {(data?.performanceData || []).map((product: any, index: number) => (
                     <tr key={index} className="border-b last:border-0 hover:bg-muted/30">
                       <td className="px-4 py-4 font-medium">{product.product}</td>
                       <td className="px-4 py-4 font-semibold">{product.sales.toLocaleString()}</td>

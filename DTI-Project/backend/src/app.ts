@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth';
+import apiRoutes from './routes';
 import { logger } from './utils/logger';
 
 dotenv.config();
@@ -32,7 +32,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // ROUTES
 // ============================================
 
-app.use('/api/auth', authRoutes);
+app.use('/api', apiRoutes);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
