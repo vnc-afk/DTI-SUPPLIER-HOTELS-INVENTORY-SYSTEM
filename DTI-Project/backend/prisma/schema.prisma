@@ -1,0 +1,199 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+enum UserRole {
+  SUPPLIER
+  HOTEL
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String    // hashed
+  name      String
+  role      UserRole
+  company   String    // Supplier/Hotel name
+  status    UserStatus @default(ACTIVE)
+  
+  // Relations
+  salesRecords  Sale[]
+  supplierPayments Payment[] @relation("SupplierPayments")
+  hotelPayments    Payment[] @relation("HotelPayments")
+  auditLogs     AuditLog[]
+  consignments  Consignment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// PRODUCTS & INVENTORY
+// ============================================
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+model Product {
+  id        String         @id @default(cuid())
+  name      String
+  description String?
+  price     Float
+  status    ProductStatus  @default(ACTIVE)
+  
+  // Relations
+  consignmentItems ConsignmentItem[]
+  hotelInventory HotelInventory[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Hotel-specific inventory tracking
+model HotelInventory {
+  id        String    @id @default(cuid())
+  hotelId   String    // USER ID of hotel
+  productId String
+  quantity  Int
+  minThreshold Int @default(10)
+  
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([hotelId, productId])
+}
+
+// ============================================
+// SALES & TRANSACTIONS
+// ============================================
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+model Sale {
+  id        String    @id @default(cuid())
+  hotelId   String    // USER ID of hotel recording sale
+  productId String?   // Optional product reference
+  quantity  Int
+  totalAmount Float
+  recordedAt DateTime @default(now())
+  
+  // Relations
+  hotel User     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+}
+
+// ============================================
+// PAYMENTS
+// ============================================
+
+model Payment {
+  id        String         @id @default(cuid())
+  invoiceNumber String     @unique
+  supplierId String        // USER ID of supplier
+  hotelId   String         // USER ID of hotel
+  amount    Float
+  status    PaymentStatus  @default(PENDING)
+  dueDate   DateTime
+  paidDate  DateTime?
+  
+  // Relations
+  supplier  User      @relation("SupplierPayments", fields: [supplierId], references: [id], onDelete: Cascade)
+  hotel     User      @relation("HotelPayments", fields: [hotelId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// CONSIGNMENTS
+// ============================================
+
+enum ConsignmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Consignment {
+  id        String               @id @default(cuid())
+  supplierId String              // USER ID
+  hotelId   String              // USER ID
+  status    ConsignmentStatus   @default(ACTIVE)
+  
+  // Relations
+  supplier  User      @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  items     ConsignmentItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ConsignmentItem {
+  id            String    @id @default(cuid())
+  consignmentId String
+  productId     String
+  quantity      Int
+  
+  // Relations
+  consignment   Consignment @relation(fields: [consignmentId], references: [id], onDelete: Cascade)
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([consignmentId, productId])
+}
+
+// ============================================
+// AUDIT LOGS
+// ============================================
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  SALE_RECORDED
+  PAYMENT_PROCESSED
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  userId    String
+  action    AuditAction
+  entity    String      // e.g., "Sale", "Payment", "User"
+  entityId  String?     // ID of affected entity
+  changes   Json?       // Track what changed
+  
+  // Relations
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+}
