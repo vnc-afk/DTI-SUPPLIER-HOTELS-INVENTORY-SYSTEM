@@ -5,10 +5,10 @@ import { RoleGate } from "@/layout/RoleGate";
 import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Package } from "lucide-react";
-
+import { ConsignmentItem } from "@/types";
 
 function ConsignmentContent() {
-  const { data, loading, error } = useFetch<any>("/api/consignments");
+  const { data, loading, error } = useFetch<ConsignmentItem[]>("/api/consignments");
 
   if (loading) {
     return (
@@ -40,27 +40,27 @@ function ConsignmentContent() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {(data || []).map((product: any, index: number) => (
-            <Card key={index} className="transition-shadow hover:shadow-md">
+          {(data || []).map((product: ConsignmentItem) => (
+            <Card key={product.id} className="transition-shadow hover:shadow-md">
               <CardContent className="space-y-4 p-6 text-center">
-                <div className="text-5xl">{product.image}</div>
+                <div className="text-5xl">{product.productImage || "📦"}</div>
                 <div>
-                  <h4 className="text-foreground">{product.name}</h4>
-                  <p className="text-sm text-muted-foreground">{product.supplier}</p>
+                  <h4 className="text-foreground">{product.productName}</h4>
+                  <p className="text-sm text-muted-foreground">{product.hotelName}</p>
                 </div>
                 <div className="flex items-center justify-between border-t pt-2">
                   <div>
-                    <p className="text-sm text-muted-foreground">In Stock</p>
-                    <p className="text-xl font-bold text-foreground">{product.qty}</p>
+                    <p className="text-sm text-muted-foreground">Remaining</p>
+                    <p className="text-xl font-bold text-foreground">{product.remainingQuantity}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Price</p>
-                    <p className="text-lg font-semibold text-foreground">{product.price}</p>
+                    <p className="text-sm text-muted-foreground">Unit Price</p>
+                    <p className="text-lg font-semibold text-foreground">₱{product.unitPrice}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))}
+          ))}}
         </div>
       </div>
     </DashboardLayout>

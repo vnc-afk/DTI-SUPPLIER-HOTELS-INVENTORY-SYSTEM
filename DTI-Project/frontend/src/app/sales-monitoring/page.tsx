@@ -7,9 +7,10 @@ import { StatCard } from "@/components/ui/stat-card";
 import { TrendingUp, DollarSign, ShoppingCart, Building2 } from "lucide-react";
 import { useFetch } from "@/hooks/useFetch";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { SalesMonitoringData, Metric } from "@/types";
 
 function SalesMonitoringContent() {
-  const { data, loading, error } = useFetch<any>("/api/reports/monitoring");
+  const { data, loading, error } = useFetch<SalesMonitoringData>("/api/reports/monitoring");
 
   if (loading) {
     return (
@@ -41,7 +42,7 @@ function SalesMonitoringContent() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {(data?.metrics || []).map((metric: any) => (
+          {(data?.metrics || []).map((metric: Metric) => (
             <StatCard
               key={metric.title}
               title={metric.title}

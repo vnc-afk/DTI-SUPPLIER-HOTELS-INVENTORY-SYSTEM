@@ -12,10 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DollarSign, Send } from "lucide-react";
 import { api } from "@/services/api";
+import { Payment } from "@/types";
 
 function PaymentsContent() {
   const { role } = useRole();
-  const { data, loading, error, refetch } = useFetch<any>("/api/payments");
+  const { data, loading, error, refetch } = useFetch<Payment[]>("/api/payments");
   const [supplierName, setSupplierName] = useState("");
   const [amount, setAmount] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
@@ -122,14 +123,14 @@ function PaymentsContent() {
                   </tr>
                 </thead>
                 <tbody>
-                    {(data || []).map((payment: any) => (
+                    {(data || []).map((payment: Payment) => (
                     <tr key={payment.id} className="border-b last:border-0 hover:bg-muted/30">
-                      <td className="px-4 py-4 font-medium">{payment.hotel}</td>
-                      <td className="px-4 py-4">{payment.amount}</td>
-                        <td className="px-4 py-4">{payment.dueDate || payment.date || payment.paidDate || "—"}</td>
+                      <td className="px-4 py-4 font-medium">{payment.hotelName}</td>
+                      <td className="px-4 py-4">₱{typeof payment.amount === 'number' ? payment.amount.toLocaleString() : payment.amount}</td>
+                        <td className="px-4 py-4">{payment.dueDate || payment.paidDate || "—"}</td>
                       <td className="px-4 py-4"><StatusBadge status={payment.status} /></td>
                     </tr>
-                  ))}
+                  ))}}
                 </tbody>
               </table>
             </div>

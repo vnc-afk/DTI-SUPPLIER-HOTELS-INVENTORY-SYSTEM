@@ -106,8 +106,8 @@ export interface ValidationErrors {
 }
 
 export const validateForm = (
-  data: Record<string, any>,
-  schema: Record<string, (value: any) => string | null>
+  data: Record<string, unknown>,
+  schema: Record<string, (value: unknown) => string | null>
 ): ValidationErrors => {
   const errors: ValidationErrors = {};
 

@@ -20,12 +20,19 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import {
+  SalesReportsData,
+  MonthlySalesData,
+  DailySalesData,
+  CategoryData,
+  SummaryItem,
+} from "@/types";
 
 const colors = ["hsl(220, 60%, 30%)", "hsl(145, 60%, 36%)", "hsl(38, 90%, 55%)", "hsl(210, 15%, 70%)"];
 
 function SalesReportsContent() {
   const { role } = useRole();
-  const { data, loading, error } = useFetch<any>("/api/reports/sales");
+  const { data, loading, error } = useFetch<SalesReportsData>("/api/reports/sales");
 
   if (loading) {
     return (
@@ -103,7 +110,7 @@ function SalesReportsContent() {
                     labelLine={{ strokeWidth: 2 }}
                     style={{ fontSize: 16 }}
                   >
-                    {(data?.categoryData || []).map((_: any, index: number) => (
+                    {(data?.categoryData || []).map((_: CategoryData, index: number) => (
                       <Cell key={index} fill={colors[index]} />
                     ))}
                   </Pie>
@@ -116,7 +123,7 @@ function SalesReportsContent() {
           <Card>
             <CardHeader><CardTitle>Summary</CardTitle></CardHeader>
             <CardContent className="space-y-5">
-              {(data?.summary || []).map((item: any, index: number) => (
+              {(data?.summary || []).map((item: SummaryItem, index: number) => (
                 <div key={index} className="flex items-center justify-between border-b py-3 last:border-0">
                   <span className="font-medium text-muted-foreground">{item.label}</span>
                   <span className="text-lg font-bold text-foreground">{item.value}</span>

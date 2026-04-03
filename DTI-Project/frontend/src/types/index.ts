@@ -194,3 +194,59 @@ export interface SubmitPaymentForm {
   referenceNumber: string;
   notes?: string;
 }
+
+// ─── Reports ──────────────────────────────────────────────────────────────────
+
+export interface PerformanceItem {
+  product: string;
+  sales: number;
+  returns: number;
+}
+
+export interface PerformanceData {
+  performanceData: PerformanceItem[];
+}
+
+export interface Metric {
+  title: string;
+  value: string;
+  trend: string;
+  trendUp: boolean;
+}
+
+export interface HotelSalesData {
+  hotel: string;
+  sales: number;
+}
+
+export interface SalesMonitoringData {
+  metrics: Metric[];
+  hotelSalesData: HotelSalesData[];
+}
+
+export interface MonthlySalesData {
+  month: string;
+  sales: number;
+}
+
+export interface DailySalesData {
+  day: string;
+  sales: number;
+}
+
+export interface CategoryData {
+  name: string;
+  value: number;
+}
+
+export interface SummaryItem {
+  label: string;
+  value: string;
+}
+
+export interface SalesReportsData {
+  monthlySales: MonthlySalesData[];
+  dailySales: DailySalesData[];
+  categoryData: CategoryData[];
+  summary: SummaryItem[];
+}

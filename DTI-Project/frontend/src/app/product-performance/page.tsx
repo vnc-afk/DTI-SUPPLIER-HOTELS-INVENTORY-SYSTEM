@@ -6,9 +6,10 @@ import { DashboardLayout } from "@/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PerformanceData, PerformanceItem } from "@/types";
 
 function ProductPerformanceContent() {
-  const { data, loading, error } = useFetch<any>("/api/reports/performance");
+  const { data, loading, error } = useFetch<PerformanceData>("/api/reports/performance");
 
   const getPerformanceColor = (sales: number) => {
     if (sales >= 1000) return "text-success";
@@ -83,7 +84,7 @@ function ProductPerformanceContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(data?.performanceData || []).map((product: any, index: number) => (
+                  {(data?.performanceData || []).map((product: PerformanceItem, index: number) => (
                     <tr key={index} className="border-b last:border-0 hover:bg-muted/30">
                       <td className="px-4 py-4 font-medium">{product.product}</td>
                       <td className="px-4 py-4 font-semibold">{product.sales.toLocaleString()}</td>
