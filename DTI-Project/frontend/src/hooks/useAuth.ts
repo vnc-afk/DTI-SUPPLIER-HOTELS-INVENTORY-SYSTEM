@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { User, UserRole } from '@/types';
 import { useLocalStorage } from './useLocalStorage';
+import { api } from '@/services/api';
 
 interface AuthState {
   user: User | null;
@@ -29,19 +30,10 @@ export const useAuth = () => {
       setError(null);
 
       try {
-        // Mock authentication - replace with actual API call
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, role }),
-        });
-
-        if (!response.ok) throw new Error('Login failed');
-
-        const { user, token } = await response.json();
+        const { user, token } = await api.auth.login(email, password, role);
 
         setAuth({
-          user,
+          user: normalizeUser(user),
           token,
           isAuthenticated: true,
         });
@@ -97,3 +89,22 @@ export const useAuth = () => {
     hasAnyRole,
   };
 };
+
+function normalizeUser(user: {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  company: string;
+  status?: string;
+  createdAt?: string;
+}): User {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role.toLowerCase() as UserRole,
+    isActive: (user.status || 'ACTIVE').toUpperCase() === 'ACTIVE',
+    createdAt: user.createdAt || new Date().toISOString(),
+  };
+}

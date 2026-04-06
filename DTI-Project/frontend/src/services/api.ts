@@ -1,180 +1,112 @@
-import { API_ENDPOINTS, API_TIMEOUT } from '@/lib/constants';
+import { trpcClient } from '@/lib/trpc';
 
 interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  headers?: Record<string, string>;
   body?: Record<string, unknown>;
-  token?: string;
 }
 
 /**
  * API Service - centralized API communication
  */
 class ApiService {
-  private baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-  private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const { method = 'GET', headers = {}, body, token } = options;
-
-    const config: RequestInit = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    };
-
-    if (body && method !== 'GET') {
-      config.body = JSON.stringify(body);
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
-
-    try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        ...config,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'API Error' }));
-        throw new Error(error.message || `HTTP ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      clearTimeout(timeoutId);
-      throw error instanceof Error ? error : new Error('Network error');
-    }
-  }
-
   // ── Auth ──────────────────────────────────────────────────────────────────
   auth = {
     login: (email: string, password: string, role: string) =>
-      this.request('/auth/login', {
-        method: 'POST',
-        body: { email, password, role },
-      }),
+      trpcClient.auth.login.mutate({ email, password }),
 
     logout: (token: string) =>
-      this.request('/auth/logout', {
-        method: 'POST',
-        token,
-      }),
+      trpcClient.auth.logout.mutate({ token }),
 
     me: (token: string) =>
-      this.request('/auth/me', {
-        token,
-      }),
+      trpcClient.auth.me.query({ token }),
   };
 
   // ── Products ──────────────────────────────────────────────────────────────
   products = {
     list: (token: string, query?: string) =>
-      this.request(`${API_ENDPOINTS.PRODUCTS}${query || ''}`, { token }),
+      trpcClient.products.list.query(undefined),
 
-    get: (id: string, token: string) =>
-      this.request(`${API_ENDPOINTS.PRODUCTS}/${id}`, { token }),
-
-    create: (data: Record<string, unknown>, token: string) =>
-      this.request(API_ENDPOINTS.PRODUCTS, {
-        method: 'POST',
-        body: data,
-        token,
-      }),
-
-    update: (id: string, data: Record<string, unknown>, token: string) =>
-      this.request(`${API_ENDPOINTS.PRODUCTS}/${id}`, {
-        method: 'PUT',
-        body: data,
-        token,
-      }),
-
-    delete: (id: string, token: string) =>
-      this.request(`${API_ENDPOINTS.PRODUCTS}/${id}`, {
-        method: 'DELETE',
-        token,
-      }),
+    create: (data: Record<string, unknown>, token: string) => {
+      // Strip out token parameter for tRPC call
+      const { token: _, ...input } = data;
+      return trpcClient.products.create.mutate(input as unknown as { name: string; price: number; description?: string });
+    },
   };
 
   // ── Sales ─────────────────────────────────────────────────────────────────
   sales = {
     list: (token: string, query?: string) =>
-      this.request(`${API_ENDPOINTS.SALES}${query || ''}`, { token }),
+      trpcClient.sales.recent.query(undefined),
 
     recent: (token: string) =>
-      this.request(`${API_ENDPOINTS.SALES}/recent`, { token }),
+      trpcClient.sales.recent.query(undefined),
 
-    create: (data: Record<string, unknown>, token: string) =>
-      this.request(API_ENDPOINTS.SALES, {
-        method: 'POST',
-        body: data,
-        token,
-      }),
+    create: (data: Record<string, unknown>, token: string) => {
+      // Strip out token parameter for tRPC call
+      const { token: _, ...input } = data;
+      return trpcClient.sales.create.mutate(input as unknown as { productId: string; quantity: number; hotelId?: string });
+    },
 
     getReports: (token: string, query?: string) =>
-      this.request(`${API_ENDPOINTS.REPORTS}${query || ''}`, { token }),
+      trpcClient.reports.sales.query(undefined),
   };
 
   // ── Payments ──────────────────────────────────────────────────────────────
   payments = {
     list: (token: string, query?: string) =>
-      this.request(`${API_ENDPOINTS.PAYMENTS}${query || ''}`, { token }),
+      trpcClient.payments.list.query(undefined),
 
     get: (id: string, token: string) =>
-      this.request(`${API_ENDPOINTS.PAYMENTS}/${id}`, { token }),
+      trpcClient.payments.list.query(undefined),
 
-    submit: (data: Record<string, unknown>, token: string) =>
-      this.request(API_ENDPOINTS.PAYMENTS, {
-        method: 'POST',
-        body: data,
-        token,
-      }),
+    submit: (data: Record<string, unknown>, token: string) => {
+      // Strip out token parameter for tRPC call
+      const { token: _, ...input } = data;
+      return trpcClient.payments.submit.mutate(input as unknown as { amount: number; supplierName: string; hotelName: string; referenceNumber?: string; paymentDate?: string });
+    },
   };
 
   // ── Consignments ──────────────────────────────────────────────────────────
   consignments = {
     list: (token: string, query?: string) =>
-      this.request(`${API_ENDPOINTS.CONSIGNMENTS}${query || ''}`, { token }),
+      trpcClient.consignments.list.query(undefined),
 
     get: (id: string, token: string) =>
-      this.request(`${API_ENDPOINTS.CONSIGNMENTS}/${id}`, { token }),
+      trpcClient.consignments.list.query(undefined),
   };
 
   dashboard = {
     get: (token: string, role: string) =>
-      this.request(`${API_ENDPOINTS.DASHBOARD}?role=${encodeURIComponent(role)}`, { token }),
+      trpcClient.dashboard.get.query({ role: (role?.toLowerCase() as 'supplier' | 'hotel' | 'admin') || 'hotel' }),
   };
 
   users = {
     list: (token: string, query?: string) =>
-      this.request(`${API_ENDPOINTS.USERS}${query || ''}`, { token }),
+      trpcClient.users.list.query({ search: query }),
 
-    create: (data: Record<string, unknown>, token: string) =>
-      this.request(API_ENDPOINTS.USERS, { method: 'POST', body: data, token }),
+    create: (data: Record<string, unknown>, token: string) => {
+      // Strip out token parameter for tRPC call
+      const { token: _, ...input } = data;
+      return trpcClient.users.create.mutate(input as unknown as { email: string; name: string; role: 'supplier' | 'hotel' | 'admin'; company: string; password?: string });
+    },
 
     toggleStatus: (id: string, token: string) =>
-      this.request(`${API_ENDPOINTS.USERS}/${id}/status`, { method: 'PATCH', token }),
+      trpcClient.users.toggleStatus.mutate({ id }),
   };
 
   alerts = {
-    list: (token: string) => this.request(API_ENDPOINTS.ALERTS, { token }),
+    list: (token: string) => trpcClient.alerts.list.query(undefined),
   };
 
   auditLogs = {
     list: (token: string, query?: string) =>
-      this.request(`${API_ENDPOINTS.AUDIT_LOGS}${query || ''}`, { token }),
+      trpcClient.auditLogs.list.query({ search: query }),
   };
 
   reports = {
-    sales: (token: string) => this.request(API_ENDPOINTS.SALES_REPORTS, { token }),
-    performance: (token: string) => this.request(API_ENDPOINTS.PRODUCT_PERFORMANCE, { token }),
-    monitoring: (token: string) => this.request(API_ENDPOINTS.SALES_MONITORING, { token }),
-    compliance: (token: string) => this.request(API_ENDPOINTS.COMPLIANCE, { token }),
+    sales: (token: string) => trpcClient.reports.sales.query(undefined),
+    performance: (token: string) => trpcClient.reports.performance.query(undefined),
+    monitoring: (token: string) => trpcClient.reports.monitoring.query(undefined),
+    compliance: (token: string) => trpcClient.reports.compliance.query(undefined),
   };
 }
 
