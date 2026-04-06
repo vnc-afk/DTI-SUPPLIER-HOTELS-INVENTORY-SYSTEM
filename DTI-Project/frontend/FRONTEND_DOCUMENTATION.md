@@ -149,11 +149,30 @@ const { role, setRole, userName, isHydrated } = useRole();
 | Hook | Purpose | Returns |
 |------|---------|---------|
 | **`useAuth.ts`** | Authentication state management; handles login/logout/session | `{ user, login, logout, isLoading, error }` |
-| **`useFetch.ts`** | Generic data fetching; manages loading/error/retry | `{ data, loading, error, refetch }` |
+| **`useFetch.ts`** | Generic data fetching; manages loading/error/retry with tRPC integration | `{ data, loading, error, refetch }` |
 | **`useForm.ts`** | Form state management; handles values/validation/submission | `{ values, errors, touched, handleChange, handleSubmit }` |
 | **`useLocalStorage.ts`** | Persist data to browser localStorage | `[value, setValue, isHydrated]` |
 | **`use-toast.ts`** | Toast notification hook from Sonner library | `{ toast }` |
 | **`use-mobile.tsx`** | Mobile/responsive breakpoint detection | `{ isMobile }` |
+
+**useFetch Hook - Supported Endpoints:**
+
+Routes `/api/*` endpoints to tRPC procedures via API service:
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/dashboard` | query | Role-specific dashboard metrics |
+| `/api/alerts` | query | Low-stock inventory alerts |
+| `/api/audit-logs` | query | Compliance audit trail |
+| `/api/users` | query | User list & management |
+| `/api/products` | query | Product catalog |
+| `/api/consignments` | query | Consignment items *(fixed in v1.1)* |
+| `/api/sales/recent` | query | Recent sales transactions |
+| `/api/payments` | query | Payment records |
+| `/api/reports/sales` | query | Sales analytics |
+| `/api/reports/performance` | query | Product performance |
+| `/api/reports/monitoring` | query | Sales monitoring |
+| `/api/reports/compliance` | query | Payment compliance |
 
 **Example - useLocalStorage:**
 ```tsx
@@ -163,6 +182,8 @@ const [role, setRole, isHydrated] = useLocalStorage('dti-role', null);
 **Example - useFetch:**
 ```tsx
 const { data: products, loading, error } = useFetch('/api/products');
+const { data: consignments } = useFetch('/api/consignments');
+const { data: alerts } = useFetch('/api/alerts');
 ```
 
 ---
@@ -535,22 +556,79 @@ RoleContext for auth state, localStorage for persistence
 
 ---
 
+## � Frontend-Backend Communication
+
+### **tRPC Integration Flow**
+
+```
+Frontend Component
+    ↓
+useFetch('/api/consignments')
+    ↓
+useFetch hook matches endpoint
+    ↓
+api.consignments.list()
+    ↓
+trpcClient.consignments.list.query()
+    ↓
+[HTTP POST to http://localhost:5000/trpc/consignments.list]
+    ↓
+Backend tRPC Router
+    ↓
+Prisma Query
+    ↓
+PostgreSQL
+    ↓
+Response (with full TypeScript types)
+    ↓
+Frontend receives typed data
+```
+
+### **Key Integration Points**
+
+1. **useHook** - `useFetch('/api/endpoint')`
+2. **API Service** - Maps endpoint to `api.*.method()`
+3. **tRPC Client** - Sends typed RPC call
+4. **Backend Router** - Processes query/mutation
+5. **Database** - Returns data via Prisma
+6. **Response** - Frontend component receives typed data
+
+---
+
+## 📝 Recent Changes
+
+### **Version 1.1 (April 6, 2026)**
+
+✅ **Fixed Issues:**
+- Fixed missing `/api/consignments` endpoint mapping in `useFetch` hook
+- Added comprehensive endpoint routing table
+- Updated hook documentation with all supported endpoints
+
+✅ **Features Added:**
+- Complete backend documentation
+- Enhanced API integration documentation
+- Better type safety for all endpoints
+
+---
+
 ## 🐛 Debugging Tips
 
-### **Role State Issues:**
-Check localStorage: `localStorage.getItem('dti-role')`
+### **Consignment Loading Issues**
 
-### **Hydration Errors:**
-Ensure components wait for `isHydrated` before rendering
+If consignment items fail to load:
+1. Verify `/api/consignments` is in `useFetch` switch statement
+2. Check backend `trpc/router.ts` has `consignments.list` procedure
+3. Ensure database has consignment records
+4. Check browser console for tRPC errors
 
-### **API Errors:**
-Check browser DevTools Network tab, ApiService error logs
+**Browser DevTools:**
+```javascript
+// Check API service routing
+localStorage.getItem('dti-role')
 
-### **TypeScript Errors:**
-Run `npm run type-check` for comprehensive type validation
-
-### **Styling Issues:**
-Use Tailwind DevTools, check `globals.css` for overrides
+// Check last fetch error
+// View Network tab → POST /trpc/consignments.list
+```
 
 ---
 
@@ -564,7 +642,8 @@ Use Tailwind DevTools, check `globals.css` for overrides
 
 ---
 
-**Last Updated:** April 2026  
+**Last Updated:** April 6, 2026  
+**Version:** 1.1  
 **Framework Version:** Next.js 13+  
 **UI Library:** shadcn/ui  
 **Language:** TypeScript
