@@ -130,7 +130,7 @@ function PaymentsContent() {
                         <td className="px-4 py-4">{payment.dueDate || payment.paidDate || "—"}</td>
                       <td className="px-4 py-4"><StatusBadge status={payment.status} /></td>
                     </tr>
-                  ))}}
+                  ))}
                 </tbody>
               </table>
             </div>

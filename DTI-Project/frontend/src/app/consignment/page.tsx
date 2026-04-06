@@ -60,7 +60,7 @@ function ConsignmentContent() {
                 </div>
               </CardContent>
             </Card>
-          ))}}
+          ))}
         </div>
       </div>
     </DashboardLayout>

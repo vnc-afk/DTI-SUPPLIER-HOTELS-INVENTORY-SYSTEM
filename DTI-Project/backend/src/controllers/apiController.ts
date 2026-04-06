@@ -177,23 +177,26 @@ export async function listConsignments(_req: Request, res: Response) {
   const data = await loadBaseData();
   const products = new Map(data.products.map((product) => [product.id, product.name]));
   const hotels = new Map(data.users.filter((user) => user.role === 'HOTEL').map((user) => [user.id, user.company]));
-  const suppliers = new Map(data.users.filter((user) => user.role === 'SUPPLIER').map((user) => [user.id, user.company]));
 
   const rows = await prisma.consignment.findMany({ include: { items: true } });
 
   const items = rows.flatMap((consignment) => consignment.items.map((item) => {
     const productName = products.get(item.productId) || 'Product';
-    const supplierName = suppliers.get(consignment.supplierId) || 'Supplier';
     const hotelName = hotels.get(consignment.hotelId) || 'Hotel';
+    const unitPrice = productProfile(productName)?.price || 0;
 
     return {
       id: item.id,
-      name: productName,
-      supplier: supplierName,
-      hotel: hotelName,
-      qty: item.quantity,
-      price: formatCurrency(productProfile(productName)?.price || 0),
-      image: '🏨',
+      productId: item.productId,
+      productName,
+      productImage: '📦',
+      hotelId: consignment.hotelId,
+      hotelName,
+      quantity: item.quantity,
+      unitPrice,
+      soldQuantity: 0,
+      remainingQuantity: item.quantity,
+      lastUpdated: consignment.updatedAt.toISOString(),
     };
   }));
 
